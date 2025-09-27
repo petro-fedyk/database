@@ -1,5 +1,6 @@
 database:
-  user: "root"
+  user: "admin"
   password: "76482544635"
-  host: "127.0.0.1"
+  host: "music-db.clga2qc2irte.eu-west-3.rds.amazonaws.com"
   database: "musuc_servise_itunes"
+  port: 3306
