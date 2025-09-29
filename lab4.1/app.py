@@ -1,7 +1,6 @@
-# app.py
-
 import yaml
 from flask import Flask
+from flasgger import Swagger   # <-- Додаємо Swagger
 from extensions import db
 from controller.account_controller import account_bp 
 from controller.soung_controller import songs_bp      
@@ -23,23 +22,37 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = config['database'].get('secret_key', 'default_secret_key')
 
+    # ініціалізація бази
     db.init_app(app)
 
+    # підключаємо blueprints
     app.register_blueprint(account_bp, url_prefix='/api')
-
     app.register_blueprint(songs_bp, url_prefix='/api')
-
     app.register_blueprint(playlists_bp, url_prefix='/api')
-
     app.register_blueprint(genre_bp, url_prefix='/api')
-
     app.register_blueprint(user_favorite_artist_bp, url_prefix='/api')
-
     app.register_blueprint(user_download_song_bp, url_prefix='/api')
+
+    # Swagger
+    swagger_config = {
+        "headers": [],
+        "specs": [
+            {
+                "endpoint": 'apispec',
+                "route": '/apispec.json',
+                "rule_filter": lambda rule: True,
+                "model_filter": lambda tag: True,
+            }
+        ],
+        "static_url_path": "/flasgger_static",
+        "swagger_ui": True,
+        "specs_route": "/swagger/"
+    }
+    Swagger(app, config=swagger_config)
 
     @app.route('/')
     def home():
-        return 'Flask app is running with config from app.yml!'
+        return 'Flask app is running with Swagger UI at /swagger/ 🚀'
 
     @app.errorhandler(404)
     def not_found_error(error):
@@ -52,8 +65,7 @@ def create_app():
 
     return app
 
+
 if __name__ == '__main__':
     app = create_app()
     app.run(host="0.0.0.0", port=5000)
-
-

@@ -1,25 +1,48 @@
 from flask import Blueprint, request, jsonify
 from service.userdownload_song_service import UserDownloadSongService
 from sqlalchemy.orm import joinedload
-from dao.models import UserDownloadHasSong, Song, UserDownload  # Імпортуйте потрібні моделі
+from dao.models import UserDownloadHasSong, Song, UserDownload
 
 user_download_song_bp = Blueprint('user_download_song_bp', __name__)
 
-# Отримати всі записи (GET)
 @user_download_song_bp.route('/userdownloads_has_songs', methods=['GET'])
 def get_all_user_downloads_songs():
-    """Отримує всі записи з таблиці userdownloads_has_songs."""
+    """
+    Get all records from userdownloads_has_songs table
+    ---
+    tags:
+      - UserDownloadsHasSongs
+    responses:
+      200:
+        description: List of user download-song records
+    """
     records = UserDownloadSongService.get_all_records()
     return jsonify(records), 200
 
-
-# Отримати запис за download_id та song_id (GET)
 @user_download_song_bp.route('/userdownloads_has_songs/<int:download_id>/<int:song_id>', methods=['GET'])
 def get_user_download_song(download_id, song_id):
     """
-    Отримує конкретний запис за download_id та song_id або детальні дані з таблиці songs та downloads.
+    Get a specific record by download_id and song_id, or detailed data from songs and downloads tables
+    ---
+    tags:
+      - UserDownloadsHasSongs
+    parameters:
+      - name: download_id
+        in: path
+        type: integer
+        required: true
+        description: Download ID
+      - name: song_id
+        in: path
+        type: integer
+        required: true
+        description: Song ID
+    responses:
+      200:
+        description: Record found
+      404:
+        description: Record not found
     """
-    # Спроба отримати детальні дані про пісню та завантаження
     record = UserDownloadHasSong.query.filter_by(
         userdownloads_download_id=download_id,
         songs_song_id=song_id
@@ -32,7 +55,6 @@ def get_user_download_song(download_id, song_id):
         UserDownload.device_type, UserDownload.operating_system, UserDownload.location
     ).first()
 
-    # Якщо знайдено пов'язані дані
     if record:
         response = {
             "userdownloads_download_id": download_id,
@@ -51,19 +73,37 @@ def get_user_download_song(download_id, song_id):
         }
         return jsonify(response), 200
 
-    # Якщо пов'язаних даних немає, повернути базовий запис
     basic_record = UserDownloadSongService.get_record(download_id, song_id)
     if basic_record:
         return jsonify(basic_record), 200
 
-    # У випадку, якщо запис не знайдено
     return jsonify({"error": "Record not found"}), 404
 
-
-# Створити новий запис (POST)
 @user_download_song_bp.route('/userdownloads_has_songs', methods=['POST'])
 def create_user_download_song():
-    """Створює новий запис у таблиці userdownloads_has_songs."""
+    """
+    Create a new record in userdownloads_has_songs table
+    ---
+    tags:
+      - UserDownloadsHasSongs
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required: [userdownloads_download_id, songs_song_id]
+          properties:
+            userdownloads_download_id:
+              type: integer
+            songs_song_id:
+              type: integer
+    responses:
+      201:
+        description: Record created
+      400:
+        description: Invalid input
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Invalid input"}), 400
@@ -71,11 +111,42 @@ def create_user_download_song():
     record = UserDownloadSongService.create_record(data)
     return jsonify(record), 201
 
-
-# Оновити запис за download_id та song_id (PUT)
 @user_download_song_bp.route('/userdownloads_has_songs/<int:download_id>/<int:song_id>', methods=['PUT'])
 def update_user_download_song(download_id, song_id):
-    """Оновлює існуючий запис за download_id та song_id."""
+    """
+    Update an existing record by download_id and song_id
+    ---
+    tags:
+      - UserDownloadsHasSongs
+    parameters:
+      - name: download_id
+        in: path
+        type: integer
+        required: true
+        description: Download ID
+      - name: song_id
+        in: path
+        type: integer
+        required: true
+        description: Song ID
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            userdownloads_download_id:
+              type: integer
+            songs_song_id:
+              type: integer
+    responses:
+      200:
+        description: Record updated
+      400:
+        description: Invalid input
+      404:
+        description: Record not found
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Invalid input"}), 400
@@ -85,11 +156,30 @@ def update_user_download_song(download_id, song_id):
         return jsonify(updated_record), 200
     return jsonify({"error": "Record not found"}), 404
 
-
-# Видалити запис за download_id та song_id (DELETE)
 @user_download_song_bp.route('/userdownloads_has_songs/<int:download_id>/<int:song_id>', methods=['DELETE'])
 def delete_user_download_song(download_id, song_id):
-    """Видаляє запис з таблиці userdownloads_has_songs за download_id та song_id."""
+    """
+    Delete a record from userdownloads_has_songs table by download_id and song_id
+    ---
+    tags:
+      - UserDownloadsHasSongs
+    parameters:
+      - name: download_id
+        in: path
+        type: integer
+        required: true
+        description: Download ID
+      - name: song_id
+        in: path
+        type: integer
+        required: true
+        description: Song ID
+    responses:
+      200:
+        description: Record deleted
+      404:
+        description: Record not found
+    """
     success = UserDownloadSongService.delete_record(download_id, song_id)
     if success:
         return jsonify({"message": "Record deleted"}), 200
