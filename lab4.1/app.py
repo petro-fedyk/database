@@ -1,5 +1,5 @@
 import yaml 
-from flask import Flask
+from flask import Flask # you need ti install flask
 from flasgger import Swagger   
 from extensions import db
 from controller.account_controller import account_bp 
