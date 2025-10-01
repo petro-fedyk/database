@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+  build:
+    commands:
+      - echo " Build started on `date`"
+      - echo "Current version:"
+      - cat version.txt || echo "0.0.0"
+
+      - CURRENT_VERSION=$(cat version.txt || echo "0.0.0")
+      - IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+      - PATCH=$((patch+1))
+      - NEW_VERSION="$major.$minor.$PATCH"
+      - echo $NEW_VERSION > version.txt
+      - echo "New version: $NEW_VERSION"
+
+artifacts:
+  files:
+    - '**/*'

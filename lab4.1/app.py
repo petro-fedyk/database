@@ -45,7 +45,7 @@ def create_app():
         "info": {
             "title": "🎶 Music Service API",
             "description": "REST API з підтримкою Swagger UI",
-            "version": get_version(),   # ← показує версію
+            "version": get_version(),   #
         },
         "basePath": "/api",
     }
