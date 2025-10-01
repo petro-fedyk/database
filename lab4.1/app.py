@@ -1,4 +1,4 @@
-import yaml 
+import yaml
 from flask import Flask, jsonify
 from flasgger import Swagger
 from extensions import db
@@ -8,6 +8,13 @@ from controller.playlist_controller import playlists_bp
 from controller.genre_controller import genre_bp 
 from controller.favorit_artist_controller import user_favorite_artist_bp  
 from controller.user_download_controller import user_download_song_bp
+
+def get_version():
+    try:
+        with open("version.txt", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "0.0.0"   # дефолтна версія
 
 def create_app():
     app = Flask(__name__)
@@ -22,10 +29,9 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = config['database'].get('secret_key', 'default_secret_key')
 
-    # ініціалізація бази
     db.init_app(app)
 
-    # підключаємо blueprints
+    # Blueprints
     app.register_blueprint(account_bp, url_prefix='/api')
     app.register_blueprint(songs_bp, url_prefix='/api')
     app.register_blueprint(playlists_bp, url_prefix='/api')
@@ -33,7 +39,17 @@ def create_app():
     app.register_blueprint(user_favorite_artist_bp, url_prefix='/api')
     app.register_blueprint(user_download_song_bp, url_prefix='/api')
 
-    # Swagger
+    # Swagger info
+    swagger_template = {
+        "swagger": "2.0",
+        "info": {
+            "title": "🎶 Music Service API",
+            "description": "REST API з підтримкою Swagger UI",
+            "version": get_version(),   # ← показує версію
+        },
+        "basePath": "/api",
+    }
+
     swagger_config = {
         "headers": [],
         "specs": [
@@ -48,29 +64,19 @@ def create_app():
         "swagger_ui": True,
         "specs_route": "/swagger/"
     }
-    Swagger(app, config=swagger_config)
+    Swagger(app, template=swagger_template, config=swagger_config)
 
     @app.route('/')
     def home():
-        return 'Flask app is running with Swagger UI at /swagger/ 🚀'
+        return f'Flask app is running 🚀 (version {get_version()}) - Swagger at /swagger/'
 
-    # ✅ Новий тестовий ендпоінт для перевірки деплою
     @app.route('/version')
     def version():
         return jsonify({
             "status": "ok",
-            "version": "1.0.1",
+            "version": get_version(),
             "message": "Код оновлено через CodePipeline 🚀"
         })
-
-    @app.errorhandler(404)
-    def not_found_error(error):
-        return {'message': 'Resource not found'}, 404
-
-    @app.errorhandler(500)
-    def internal_error(error):
-        db.session.rollback()
-        return {'message': 'Internal server error'}, 500
 
     return app
 
