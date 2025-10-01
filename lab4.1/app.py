@@ -1,6 +1,6 @@
 import yaml 
-from flask import Flask 
-from flasgger import Swagger   
+from flask import Flask # add Flask
+from flasgger import Swagger   # add Swagger
 from extensions import db
 from controller.account_controller import account_bp 
 from controller.soung_controller import songs_bp      
