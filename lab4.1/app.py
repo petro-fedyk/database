@@ -1,6 +1,6 @@
 import yaml 
-from flask import Flask # add Flask
-from flasgger import Swagger   # add Swagger
+from flask import Flask, jsonify
+from flasgger import Swagger
 from extensions import db
 from controller.account_controller import account_bp 
 from controller.soung_controller import songs_bp      
@@ -53,6 +53,15 @@ def create_app():
     @app.route('/')
     def home():
         return 'Flask app is running with Swagger UI at /swagger/ 🚀'
+
+    # ✅ Новий тестовий ендпоінт для перевірки деплою
+    @app.route('/version')
+    def version():
+        return jsonify({
+            "status": "ok",
+            "version": "1.0.1",
+            "message": "Код оновлено через CodePipeline 🚀"
+        })
 
     @app.errorhandler(404)
     def not_found_error(error):
