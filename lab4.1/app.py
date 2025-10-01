@@ -14,7 +14,7 @@ def get_version():
         with open("version.txt", "r") as f:
             return f.read().strip()
     except FileNotFoundError:
-        return "0.0.0"   # дефолтна версія
+        return "0.0.0"  
 
 def create_app():
     app = Flask(__name__)
@@ -31,7 +31,7 @@ def create_app():
 
     db.init_app(app)
 
-    # Blueprints
+
     app.register_blueprint(account_bp, url_prefix='/api')
     app.register_blueprint(songs_bp, url_prefix='/api')
     app.register_blueprint(playlists_bp, url_prefix='/api')
@@ -39,7 +39,7 @@ def create_app():
     app.register_blueprint(user_favorite_artist_bp, url_prefix='/api')
     app.register_blueprint(user_download_song_bp, url_prefix='/api')
 
-    # Swagger info
+
     swagger_template = {
         "swagger": "2.0",
         "info": {
@@ -68,14 +68,14 @@ def create_app():
 
     @app.route('/')
     def home():
-        return f'Flask app is running 🚀 (version {get_version()}) - Swagger at /swagger/'
+        return f'Flask app is running  (version {get_version()}) - Swagger at /swagger/'
 
     @app.route('/version')
     def version():
         return jsonify({
             "status": "ok",
             "version": get_version(),
-            "message": "Код оновлено через CodePipeline 🚀"
+            "message": "Code updated via CodePipeline"
         })
 
     return app
