@@ -78,6 +78,23 @@ def create_app():
             "message": "Code updated via CodePipeline"
         })
 
+    @app.route('/demo')
+    def demo():
+        """
+        Demo endpoint
+        ---
+        responses:
+          200:
+            description: Повертає статус роботи API
+            examples:
+              application/json: { "status": "success", "message": "Demo endpoint is working ✅" }
+        """
+        return jsonify({
+            "status": "success",
+            "message": "Demo endpoint is working ✅",
+            "version": get_version()
+        })
+
     return app
 
 
